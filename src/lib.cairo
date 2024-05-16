@@ -3,8 +3,7 @@ mod systems {
 }
 
 mod models {
-    mod moves;
-    mod position;
+    mod game;
 }
 
 mod tests {

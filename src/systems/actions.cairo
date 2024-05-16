@@ -1,75 +1,122 @@
-use dojo_starter::models::moves::Direction;
-use dojo_starter::models::position::Position;
+use starknet::{ContractAddress};
+use mancala::models::{game::{Game}};
 
 // define the interface
 #[dojo::interface]
 trait IActions {
-    fn spawn();
-    fn move(direction: Direction);
+    fn create_game(player_1: ContractAddress, player_2: ContractAddress) -> Game;
+    fn move(game_id: u32, selected_pit: u32) -> bool;
 }
 
 // dojo decorator
 #[dojo::contract]
 mod actions {
-    use super::{IActions, next_position};
+    use super::{IActions};
     use starknet::{ContractAddress, get_caller_address};
-    use dojo_starter::models::{position::{Position, Vec2}, moves::{Moves, Direction}};
+    use starknet::contract_address::ContractAddressZeroable;
+    use mancala::models::{game::{Game, GameId}};
+    use core::array::Array;
 
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn spawn(world: IWorldDispatcher) {
-            // Get the address of the current caller, possibly the player's address.
-            let player = get_caller_address();
-            // Retrieve the player's current position from the world.
-            let position = get!(world, player, (Position));
+        fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> Game{
 
-            // Update the world state with the new data.
-            // 1. Set the player's remaining moves to 100.
-            // 2. Move the player's position 10 units in both the x and y direction.
-            set!(
-                world,
-                (
-                    Moves { player, remaining: 100, last_direction: Direction::None(()) },
-                    Position {
-                        player, vec: Vec2 { x: position.vec.x + 10, y: position.vec.y + 10 }
-                    },
-                )
-            );
+            let curr_world_id = world.uuid();
+            let game_id: GameId = get!(world, curr_world_id, (GameId));
+            let game: Game = Game {
+                game_id: game_id.game_id,
+                player_one: player_1,
+                player_two: player_2,
+                winner: ContractAddressZeroable::zero(),
+                current_player: player_1,
+                score: 0,
+                is_finished: false,
+                p1_pit1: 4,
+                p1_pit2: 4,
+                p1_pit3: 4,
+                p1_pit4: 4,
+                p1_pit5: 4,
+                p1_pit6: 4,
+                p2_pit1: 4,
+                p2_pit2: 4,
+                p2_pit3: 4,
+                p2_pit4: 4,
+                p2_pit5: 4,
+                p2_pit6: 4,
+                p1_store: 0,
+                p2_store: 0
+            };
+            set!(world,(game));
+            set!(world, (GameId{world_id: curr_world_id, game_id: game_id.game_id + 1}));
+            game
         }
 
-        // Implementation of the move function for the ContractState struct.
-        fn move(world: IWorldDispatcher, direction: Direction) {
-            // Get the address of the current caller, possibly the player's address.
-            let player = get_caller_address();
-
-            // Retrieve the player's current position and moves data from the world.
-            let (mut position, mut moves) = get!(world, player, (Position, Moves));
-
-            // Deduct one from the player's remaining moves.
-            moves.remaining -= 1;
-
-            // Update the last direction the player moved in.
-            moves.last_direction = direction;
-
-            // Calculate the player's next position based on the provided direction.
-            let next = next_position(position, direction);
-
-            // Update the world state with the new moves data and position.
-            set!(world, (moves, next));
-            // Emit an event to the world to notify about the player's move.
-            emit!(world, (moves));
+        fn move(world: IWorldDispatcher, game_id: u32, selected_pit: u32) -> bool {
+            let mut game: Game = get!(world, game_id, (Game));
+            let player: ContractAddress = get_caller_address();
+            let current_player: ContractAddress = game.current_player;
+        
+            if player != current_player {
+                panic!("You are not the current player");
+            }
+        
+            if selected_pit > 5 {
+                panic!("Invalid pit, choose between 0 and 5");
+            }
+        
+            // Get stones from the selected pit and validate it's not empty
+            let mut stones = match selected_pit {
+                0 => if current_player == game.player_one { game.p1_pit1 } else { game.p2_pit1 },
+                1 => if current_player == game.player_one { game.p1_pit2 } else { game.p2_pit2 },
+                2 => if current_player == game.player_one { game.p1_pit3 } else { game.p2_pit3 },
+                3 => if current_player == game.player_one { game.p1_pit4 } else { game.p2_pit4 },
+                4 => if current_player == game.player_one { game.p1_pit5 } else { game.p2_pit5 },
+                5 => if current_player == game.player_one { game.p1_pit6 } else { game.p2_pit6 },
+                _ => panic!("Invalid pit selected"),
+            };
+        
+            if stones == 0 {
+                panic!("Selected pit is empty. Choose another pit.");
+            }
+        
+            // Clear the selected pit
+            match selected_pit {
+                0 => if current_player == game.player_one { game.p1_pit1 = 0 } else { game.p2_pit1 = 0 },
+                1 => if current_player == game.player_one { game.p1_pit2 = 0 } else { game.p2_pit2 = 0 },
+                2 => if current_player == game.player_one { game.p1_pit3 = 0 } else { game.p2_pit3 = 0 },
+                3 => if current_player == game.player_one { game.p1_pit4 = 0 } else { game.p2_pit4 = 0 },
+                4 => if current_player == game.player_one { game.p1_pit5 = 0 } else { game.p2_pit5 = 0 },
+                5 => if current_player == game.player_one { game.p1_pit6 = 0 } else { game.p2_pit6 = 0 },
+                _ => panic!("Invalid pit selected"),
+            };
+        
+            // Distribute stones
+            let mut current_pit = selected_pit;
+            while stones > 0 {
+                current_pit = (current_pit + 1) % 6; // wrap around to the first pit
+                if current_pit == selected_pit {
+                    continue; // skip the originally selected pit as it's been emptied
+                }
+                
+                match current_pit {
+                    0 => if current_player == game.player_one { game.p1_pit1 += 1 } else { game.p2_pit1 += 1 },
+                    1 => if current_player == game.player_one { game.p1_pit2 += 1 } else { game.p2_pit2 += 1 },
+                    2 => if current_player == game.player_one { game.p1_pit3 += 1 } else { game.p2_pit3 += 1 },
+                    3 => if current_player == game.player_one { game.p1_pit4 += 1 } else { game.p2_pit4 += 1 },
+                    4 => if current_player == game.player_one { game.p1_pit5 += 1 } else { game.p2_pit5 += 1 },
+                    5 => if current_player == game.player_one { game.p1_pit6 += 1 } else { game.p2_pit6 += 1 },
+                    _ => panic!("Invalid pit selected"),
+                };
+        
+                stones -= 1;
+            };
+        
+            // Update the game state
+            set!(world, (game));
+        
+            // Switch players, or manage additional game logic here
+            true
         }
+        
     }
-}
-
-// Define function like this:
-fn next_position(mut position: Position, direction: Direction) -> Position {
-    match direction {
-        Direction::None => { return position; },
-        Direction::Left => { position.vec.x -= 1; },
-        Direction::Right => { position.vec.x += 1; },
-        Direction::Up => { position.vec.y -= 1; },
-        Direction::Down => { position.vec.y += 1; },
-    };
-    position
 }

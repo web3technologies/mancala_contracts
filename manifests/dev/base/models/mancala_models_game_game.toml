@@ -1,0 +1,110 @@
+kind = "DojoModel"
+class_hash = "0x29ed79ab8023a4bc637b430729cc7fae34e88f754de9cc587f44b082fefab73"
+original_class_hash = "0x29ed79ab8023a4bc637b430729cc7fae34e88f754de9cc587f44b082fefab73"
+abi = "manifests/dev/abis/base/models/mancala_models_game_game.json"
+name = "mancala::models::game::game"
+
+[[members]]
+name = "game_id"
+type = "u128"
+key = true
+
+[[members]]
+name = "player_one"
+type = "ContractAddress"
+key = false
+
+[[members]]
+name = "player_two"
+type = "ContractAddress"
+key = false
+
+[[members]]
+name = "current_player"
+type = "ContractAddress"
+key = false
+
+[[members]]
+name = "winner"
+type = "ContractAddress"
+key = false
+
+[[members]]
+name = "score"
+type = "u8"
+key = false
+
+[[members]]
+name = "is_finished"
+type = "bool"
+key = false
+
+[[members]]
+name = "p1_pit1"
+type = "u8"
+key = false
+
+[[members]]
+name = "p1_pit2"
+type = "u8"
+key = false
+
+[[members]]
+name = "p1_pit3"
+type = "u8"
+key = false
+
+[[members]]
+name = "p1_pit4"
+type = "u8"
+key = false
+
+[[members]]
+name = "p1_pit5"
+type = "u8"
+key = false
+
+[[members]]
+name = "p1_pit6"
+type = "u8"
+key = false
+
+[[members]]
+name = "p2_pit1"
+type = "u8"
+key = false
+
+[[members]]
+name = "p2_pit2"
+type = "u8"
+key = false
+
+[[members]]
+name = "p2_pit3"
+type = "u8"
+key = false
+
+[[members]]
+name = "p2_pit4"
+type = "u8"
+key = false
+
+[[members]]
+name = "p2_pit5"
+type = "u8"
+key = false
+
+[[members]]
+name = "p2_pit6"
+type = "u8"
+key = false
+
+[[members]]
+name = "p1_store"
+type = "u256"
+key = false
+
+[[members]]
+name = "p2_store"
+type = "u256"
+key = false

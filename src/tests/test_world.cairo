@@ -6,53 +6,47 @@ mod tests {
     // import test utils
     use dojo::test_utils::{spawn_test_world, deploy_contract};
     // import test utils
-    use dojo_starter::{
+
+
+    use mancala::{
+        // systems::{actions::{actions, IActionsDispatcher, IActionsDispatcherTrait}},
         systems::{actions::{actions, IActionsDispatcher, IActionsDispatcherTrait}},
-        models::{position::{Position, Vec2, position}, moves::{Moves, Direction, moves}}
+        models::{game::{Game, GameId, game}}
     };
 
     #[test]
-    #[available_gas(30000000)]
+    #[available_gas(300000000000)]
     fn test_move() {
         // caller
-        let caller = starknet::contract_address_const::<0x0>();
-
+        let player_one = starknet::contract_address_const::<0x0>();
+        let player_two = starknet::contract_address_const::<0x1>();
         // models
-        let mut models = array![position::TEST_CLASS_HASH, moves::TEST_CLASS_HASH];
-
+        let mut models = array![game::TEST_CLASS_HASH];
         // deploy world with models
         let world = spawn_test_world(models);
 
+
         // deploy systems contract
-        let contract_address = world
-            .deploy_contract('salt', actions::TEST_CLASS_HASH.try_into().unwrap());
-        let actions_system = IActionsDispatcher { contract_address };
+        let contract_address = world.deploy_contract('salt', actions::TEST_CLASS_HASH.try_into().unwrap());
+        let actions_system = IActionsDispatcher { contract_address: contract_address };
+        
+        let game: Game = actions_system.create_game(player_one, player_two);
+        assert(game.p1_pit1 == 4, 'not init correctly');
+        assert(game.p1_pit2 == 4, 'not init correctly');
+        assert(game.p1_pit3 == 4, 'not init correctly');
+        assert(game.p1_pit4 == 4, 'not init correctly');
+        assert(game.p1_pit5 == 4, 'not init correctly');
+        assert(game.p1_pit6 == 4, 'not init correctly');
+        assert(game.p2_pit1 == 4, 'not init correctly');
+        assert(game.p2_pit2 == 4, 'not init correctly');
+        assert(game.p2_pit3 == 4, 'not init correctly');
+        assert(game.p2_pit4 == 4, 'not init correctly');
+        assert(game.p2_pit5 == 4, 'not init correctly');
+        assert(game.p2_pit6 == 4, 'not init correctly');
 
-        // call spawn()
-        actions_system.spawn();
-
-        // call move with direction right
-        actions_system.move(Direction::Right);
-
-        // Check world state
-        let moves = get!(world, caller, Moves);
-
-        // casting right direction
-        let right_dir_felt: felt252 = Direction::Right.into();
-
-        // check moves
-        assert(moves.remaining == 99, 'moves is wrong');
-
-        // check last direction
-        assert(moves.last_direction.into() == right_dir_felt, 'last direction is wrong');
-
-        // get new_position
-        let new_position = get!(world, caller, Position);
-
-        // check new position x
-        assert(new_position.vec.x == 11, 'position x is wrong');
-
-        // check new position y
-        assert(new_position.vec.y == 10, 'position y is wrong');
+        // let selected_pit: u32 = 1;
+        // actions_system.move(game.game_id, selected_pit);
+        // let game: Game = get!(world, game.game_id, (Game));
+        // assert(game.p1_pit1 == 3, 'not correct');
     }
 }
