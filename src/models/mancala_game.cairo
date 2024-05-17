@@ -116,6 +116,7 @@ impl MancalaImpl of MancalaGameTrait{
     fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u32){
         let mut current_pit = selected_pit;
         while stones > 0 {
+            // todo handle store logic so dont just wrap around
             current_pit = (current_pit + 1) % 6; // wrap around to the first pit
             if current_pit == selected_pit {
                 continue; // skip the originally selected pit as it's been emptied
@@ -130,6 +131,8 @@ impl MancalaImpl of MancalaGameTrait{
                 6 => if self.current_player == self.player_one { self.p1_pit6 += 1 } else { self.p2_pit6 += 1 },
                 _ => panic!("Invalid pit selected"),
             };
+
+            // if stones == 1 and next pit == 0 then capture players opposite pit
     
             stones -= 1;
         };

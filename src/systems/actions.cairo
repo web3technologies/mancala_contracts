@@ -11,6 +11,7 @@ trait IActions {
 // dojo decorator
 #[dojo::contract]
 mod actions {
+    
     use super::{IActions};
     use starknet::{ContractAddress, get_caller_address};
     use starknet::contract_address::ContractAddressZeroable;
