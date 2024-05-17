@@ -70,6 +70,7 @@ mod actions {
             }
             mancala_game.clear_pit(selected_pit);
             mancala_game.distribute_stones(ref stones, selected_pit);
+            // todo implement
             mancala_game.capture();
             // todo implement
             mancala_game.switch_player();
