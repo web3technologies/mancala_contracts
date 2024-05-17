@@ -1,0 +1,15 @@
+kind = "DojoModel"
+class_hash = "0x77bfed0d687ffc53a5c19b5a618bb0fa48000b897a79aa321a1ea0ff581f6f"
+original_class_hash = "0x77bfed0d687ffc53a5c19b5a618bb0fa48000b897a79aa321a1ea0ff581f6f"
+abi = "manifests/dev/abis/base/models/mancala_models_mancala_game_game_id.json"
+name = "mancala::models::mancala_game::game_id"
+
+[[members]]
+name = "world_id"
+type = "u32"
+key = true
+
+[[members]]
+name = "game_id"
+type = "u128"
+key = false

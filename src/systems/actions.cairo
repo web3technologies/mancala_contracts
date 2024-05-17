@@ -1,11 +1,11 @@
 use starknet::{ContractAddress};
-use mancala::models::{game::{Game}};
+use mancala::models::{mancala_game::{MancalaGame}};
 
 // define the interface
 #[dojo::interface]
 trait IActions {
-    fn create_game(player_1: ContractAddress, player_2: ContractAddress) -> Game;
-    fn move(game_id: u32, selected_pit: u32) -> bool;
+    fn create_game(player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame;
+    fn move(game_id: u128, selected_pit: u32) -> bool;
 }
 
 // dojo decorator
@@ -14,16 +14,28 @@ mod actions {
     use super::{IActions};
     use starknet::{ContractAddress, get_caller_address};
     use starknet::contract_address::ContractAddressZeroable;
-    use mancala::models::{game::{Game, GameId}};
+    use mancala::models::{mancala_game::{MancalaGame, MancalaGameTrait, GameId}};
     use core::array::Array;
 
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-        fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> Game{
+        fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame{
+            
+            // is caller owner of januarys nft
+
+            
+            
+            let player: felt252 = get_caller_address().into();
+            let player_1_str: felt252 = player_1.into();
+            let player_2_str: felt252 = player_2.into();
+            println!("Caller: {}", player);
+            println!("Player1: {}", player_1_str);
+            println!("Player2: {}", player_2_str);
+
 
             let curr_world_id = world.uuid();
             let game_id: GameId = get!(world, curr_world_id, (GameId));
-            let game: Game = Game {
+            let game: MancalaGame = MancalaGame {
                 game_id: game_id.game_id,
                 player_one: player_1,
                 player_two: player_2,
@@ -51,65 +63,32 @@ mod actions {
             game
         }
 
-        fn move(world: IWorldDispatcher, game_id: u32, selected_pit: u32) -> bool {
-            let mut game: Game = get!(world, game_id, (Game));
+        fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u32) -> bool {
+            let mut game: MancalaGame = get!(world, game_id, (MancalaGame));
             let player: ContractAddress = get_caller_address();
             let current_player: ContractAddress = game.current_player;
         
+            let current_player_str: felt252 = player.into();
+            
+            println!("current player addres {}", current_player_str);
+
             if player != current_player {
                 panic!("You are not the current player");
             }
         
-            if selected_pit > 5 {
+            if selected_pit < 1 || selected_pit > 6 {
                 panic!("Invalid pit, choose between 0 and 5");
             }
         
             // Get stones from the selected pit and validate it's not empty
-            let mut stones = match selected_pit {
-                0 => if current_player == game.player_one { game.p1_pit1 } else { game.p2_pit1 },
-                1 => if current_player == game.player_one { game.p1_pit2 } else { game.p2_pit2 },
-                2 => if current_player == game.player_one { game.p1_pit3 } else { game.p2_pit3 },
-                3 => if current_player == game.player_one { game.p1_pit4 } else { game.p2_pit4 },
-                4 => if current_player == game.player_one { game.p1_pit5 } else { game.p2_pit5 },
-                5 => if current_player == game.player_one { game.p1_pit6 } else { game.p2_pit6 },
-                _ => panic!("Invalid pit selected"),
-            };
-        
+            let mut stones = game.get_stones(selected_pit);
             if stones == 0 {
                 panic!("Selected pit is empty. Choose another pit.");
             }
-        
             // Clear the selected pit
-            match selected_pit {
-                0 => if current_player == game.player_one { game.p1_pit1 = 0 } else { game.p2_pit1 = 0 },
-                1 => if current_player == game.player_one { game.p1_pit2 = 0 } else { game.p2_pit2 = 0 },
-                2 => if current_player == game.player_one { game.p1_pit3 = 0 } else { game.p2_pit3 = 0 },
-                3 => if current_player == game.player_one { game.p1_pit4 = 0 } else { game.p2_pit4 = 0 },
-                4 => if current_player == game.player_one { game.p1_pit5 = 0 } else { game.p2_pit5 = 0 },
-                5 => if current_player == game.player_one { game.p1_pit6 = 0 } else { game.p2_pit6 = 0 },
-                _ => panic!("Invalid pit selected"),
-            };
-        
+            game.clear_pit(selected_pit);
             // Distribute stones
-            let mut current_pit = selected_pit;
-            while stones > 0 {
-                current_pit = (current_pit + 1) % 6; // wrap around to the first pit
-                if current_pit == selected_pit {
-                    continue; // skip the originally selected pit as it's been emptied
-                }
-                
-                match current_pit {
-                    0 => if current_player == game.player_one { game.p1_pit1 += 1 } else { game.p2_pit1 += 1 },
-                    1 => if current_player == game.player_one { game.p1_pit2 += 1 } else { game.p2_pit2 += 1 },
-                    2 => if current_player == game.player_one { game.p1_pit3 += 1 } else { game.p2_pit3 += 1 },
-                    3 => if current_player == game.player_one { game.p1_pit4 += 1 } else { game.p2_pit4 += 1 },
-                    4 => if current_player == game.player_one { game.p1_pit5 += 1 } else { game.p2_pit5 += 1 },
-                    5 => if current_player == game.player_one { game.p1_pit6 += 1 } else { game.p2_pit6 += 1 },
-                    _ => panic!("Invalid pit selected"),
-                };
-        
-                stones -= 1;
-            };
+            game.distribute_stones(ref stones, selected_pit);
         
             // Update the game state
             set!(world, (game));

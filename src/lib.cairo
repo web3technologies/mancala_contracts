@@ -3,7 +3,7 @@ mod systems {
 }
 
 mod models {
-    mod game;
+    mod mancala_game;
 }
 
 mod tests {

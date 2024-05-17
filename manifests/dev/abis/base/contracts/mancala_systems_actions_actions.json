@@ -59,6 +59,124 @@
     "interface_name": "mancala::systems::actions::IActions"
   },
   {
+    "type": "enum",
+    "name": "core::bool",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "core::integer::u256",
+    "members": [
+      {
+        "name": "low",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "high",
+        "type": "core::integer::u128"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "mancala::models::mancala_game::MancalaGame",
+    "members": [
+      {
+        "name": "game_id",
+        "type": "core::integer::u128"
+      },
+      {
+        "name": "player_one",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "player_two",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "current_player",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "winner",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "name": "score",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "is_finished",
+        "type": "core::bool"
+      },
+      {
+        "name": "p1_pit1",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p1_pit2",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p1_pit3",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p1_pit4",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p1_pit5",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p1_pit6",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p2_pit1",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p2_pit2",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p2_pit3",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p2_pit4",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p2_pit5",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p2_pit6",
+        "type": "core::integer::u8"
+      },
+      {
+        "name": "p1_store",
+        "type": "core::integer::u256"
+      },
+      {
+        "name": "p2_store",
+        "type": "core::integer::u256"
+      }
+    ]
+  },
+  {
     "type": "interface",
     "name": "mancala::systems::actions::IActions",
     "items": [
@@ -75,7 +193,11 @@
             "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
-        "outputs": [],
+        "outputs": [
+          {
+            "type": "mancala::models::mancala_game::MancalaGame"
+          }
+        ],
         "state_mutability": "view"
       },
       {
@@ -84,14 +206,18 @@
         "inputs": [
           {
             "name": "game_id",
-            "type": "core::integer::u32"
+            "type": "core::integer::u128"
           },
           {
-            "name": "pit",
+            "name": "selected_pit",
             "type": "core::integer::u32"
           }
         ],
-        "outputs": [],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
         "state_mutability": "view"
       }
     ]
