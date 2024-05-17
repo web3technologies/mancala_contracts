@@ -21,18 +21,12 @@ mod actions {
     impl ActionsImpl of IActions<ContractState> {
         fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame{
             
-            // is caller owner of januarys nft
-
-            
-            
             let player: felt252 = get_caller_address().into();
             let player_1_str: felt252 = player_1.into();
             let player_2_str: felt252 = player_2.into();
             println!("Caller: {}", player);
             println!("Player1: {}", player_1_str);
             println!("Player2: {}", player_2_str);
-
-
             let curr_world_id = world.uuid();
             let game_id: GameId = get!(world, curr_world_id, (GameId));
             let game: MancalaGame = MancalaGame {
@@ -64,36 +58,23 @@ mod actions {
         }
 
         fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u32) -> bool {
-            let mut game: MancalaGame = get!(world, game_id, (MancalaGame));
+            let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
             let player: ContractAddress = get_caller_address();
-            let current_player: ContractAddress = game.current_player;
-        
-            let current_player_str: felt252 = player.into();
             
-            println!("current player addres {}", current_player_str);
-
-            if player != current_player {
-                panic!("You are not the current player");
-            }
-        
-            if selected_pit < 1 || selected_pit > 6 {
-                panic!("Invalid pit, choose between 0 and 5");
-            }
+            mancala_game.validate_move(player, selected_pit);
         
             // Get stones from the selected pit and validate it's not empty
-            let mut stones = game.get_stones(selected_pit);
+            let mut stones = mancala_game.get_stones(selected_pit);
             if stones == 0 {
                 panic!("Selected pit is empty. Choose another pit.");
             }
-            // Clear the selected pit
-            game.clear_pit(selected_pit);
-            // Distribute stones
-            game.distribute_stones(ref stones, selected_pit);
-        
-            // Update the game state
-            set!(world, (game));
-        
-            // Switch players, or manage additional game logic here
+            mancala_game.clear_pit(selected_pit);
+            mancala_game.distribute_stones(ref stones, selected_pit);
+            mancala_game.capture();
+            // todo implement
+            mancala_game.switch_player();
+
+            set!(world, (mancala_game));
             true
         }
         

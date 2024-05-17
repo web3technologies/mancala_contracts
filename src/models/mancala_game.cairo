@@ -33,13 +33,29 @@ struct MancalaGame {
     p2_store: u256
 }
 
+
 trait MancalaGameTrait{
     fn get_stones(self: MancalaGame, selected_pit: u32) -> u8;
     fn clear_pit(ref self: MancalaGame, selected_pit: u32);
     fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u32);
+    fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u32);
+    // todo implement logic
+    fn switch_player(self: MancalaGame);
+    // todo implement logic
+    fn capture(self: MancalaGame);
 }
 
+
 impl MancalaImpl of MancalaGameTrait{
+
+    fn validate_move(self: MancalaGame, player: ContractAddress, selected_pit: u32){
+        if player != self.current_player {
+            panic!("You are not the current player");
+        }
+        if selected_pit < 1 || selected_pit > 6 {
+            panic!("Invalid pit, choose between 0 and 5");
+        }
+    }
 
     fn get_stones(self: MancalaGame, selected_pit: u32) -> u8{
         let mut stones: u8 = match selected_pit {
@@ -89,4 +105,7 @@ impl MancalaImpl of MancalaGameTrait{
             stones -= 1;
         };
     }
+
+    fn switch_player(self: MancalaGame){}
+    fn capture(self: MancalaGame){}
 }
