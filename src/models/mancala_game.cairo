@@ -1,4 +1,5 @@
 use starknet::ContractAddress;
+use starknet::contract_address::ContractAddressZeroable;
 
 #[derive(Model, Copy, Drop, Serde)]
 struct GameId {
@@ -43,10 +44,38 @@ trait MancalaGameTrait{
     fn switch_player(self: MancalaGame);
     // todo implement logic
     fn capture(self: MancalaGame);
+    fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame;
 }
 
 
 impl MancalaImpl of MancalaGameTrait{
+
+    fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame{
+        let mancala_game: MancalaGame = MancalaGame {
+            game_id: game_id,
+            player_one: player_one,
+            player_two: player_two,
+            winner: ContractAddressZeroable::zero(),
+            current_player: player_one,
+            score: 0,
+            is_finished: false,
+            p1_pit1: 4,
+            p1_pit2: 4,
+            p1_pit3: 4,
+            p1_pit4: 4,
+            p1_pit5: 4,
+            p1_pit6: 4,
+            p2_pit1: 4,
+            p2_pit2: 4,
+            p2_pit3: 4,
+            p2_pit4: 4,
+            p2_pit5: 4,
+            p2_pit6: 4,
+            p1_store: 0,
+            p2_store: 0
+        };
+        mancala_game
+    }
 
     fn validate_move(self: MancalaGame, player: ContractAddress, selected_pit: u32){
         if player != self.current_player {

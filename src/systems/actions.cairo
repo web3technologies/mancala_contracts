@@ -20,41 +20,12 @@ mod actions {
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
         fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame{
-            
-            let player: felt252 = get_caller_address().into();
-            let player_1_str: felt252 = player_1.into();
-            let player_2_str: felt252 = player_2.into();
-            println!("Caller: {}", player);
-            println!("Player1: {}", player_1_str);
-            println!("Player2: {}", player_2_str);
             let curr_world_id = world.uuid();
             let game_id: GameId = get!(world, curr_world_id, (GameId));
-            let game: MancalaGame = MancalaGame {
-                game_id: game_id.game_id,
-                player_one: player_1,
-                player_two: player_2,
-                winner: ContractAddressZeroable::zero(),
-                current_player: player_1,
-                score: 0,
-                is_finished: false,
-                p1_pit1: 4,
-                p1_pit2: 4,
-                p1_pit3: 4,
-                p1_pit4: 4,
-                p1_pit5: 4,
-                p1_pit6: 4,
-                p2_pit1: 4,
-                p2_pit2: 4,
-                p2_pit3: 4,
-                p2_pit4: 4,
-                p2_pit5: 4,
-                p2_pit6: 4,
-                p1_store: 0,
-                p2_store: 0
-            };
-            set!(world,(game));
+            let mancala_game: MancalaGame = MancalaGameTrait::new(game_id.game_id, player_1, player_2);
+            set!(world,(mancala_game));
             set!(world, (GameId{world_id: curr_world_id, game_id: game_id.game_id + 1}));
-            game
+            mancala_game
         }
 
         fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u32) -> bool {
