@@ -1,5 +1,10 @@
+use core::traits::Into;
 use starknet::ContractAddress;
 use starknet::contract_address::ContractAddressZeroable;
+use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
+
+use mancala::models::player::{GamePlayer, GamePlayerTrait};
+
 
 #[derive(Model, Copy, Drop, Serde)]
 struct GameId {
@@ -31,20 +36,22 @@ struct MancalaGame {
     p2_pit5: u8,
     p2_pit6: u8,
     p1_store: u256,
-    p2_store: u256
+    p2_store: u256,
 }
 
 
 trait MancalaGameTrait{
-    fn get_stones(self: MancalaGame, selected_pit: u32) -> u8;
-    fn clear_pit(ref self: MancalaGame, selected_pit: u32);
-    fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u32);
-    fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u32);
+    fn get_stones(self: MancalaGame, player:GamePlayer, selected_pit: u8) -> u8;
+    fn clear_pit(ref self: MancalaGame, player: GamePlayer, selected_pit: u8);
+    fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u8);
+    fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u8);
     // todo implement logic
     fn switch_player(self: MancalaGame);
     // todo implement logic
     fn capture(self: MancalaGame);
     fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame;
+    fn is_game_finished(self: MancalaGame) -> bool;
+    fn get_players(self: MancalaGame, world: IWorldDispatcher) -> (GamePlayer, GamePlayer);
 }
 
 
@@ -72,12 +79,30 @@ impl MancalaImpl of MancalaGameTrait{
             p2_pit5: 4,
             p2_pit6: 4,
             p1_store: 0,
-            p2_store: 0
+            p2_store: 0,
         };
+        let active_player_str: felt252 = mancala_game.current_player.into();
+        println!("active should be {}", active_player_str);
         mancala_game
     }
 
-    fn validate_move(self: MancalaGame, player: ContractAddress, selected_pit: u32){
+    fn get_players(self: MancalaGame, world: IWorldDispatcher)-> (GamePlayer, GamePlayer){
+        let player_one: GamePlayer = get!(world, (self.player_one, self.game_id), (GamePlayer));
+        let player_two: GamePlayer = get!(world, (self.player_two, self.game_id), (GamePlayer));
+        let current_player_address: felt252 = player_one.address.into();
+        let other_player_address: felt252 = player_two.address.into();
+        println!("real test pit:{} adress:{}", player_one.pit1, current_player_address);
+        println!("real test2 pit:{} addres:{}", player_two.pit1, other_player_address);
+        // the first player in the tupple is the current player
+        if (self.current_player == player_one.address){
+            (player_one, player_two)
+        } else{
+            (player_two, player_one)
+        }
+    }
+
+
+    fn validate_move(self: MancalaGame, player: ContractAddress, selected_pit: u8){
         if player != self.current_player {
             panic!("You are not the current player");
         }
@@ -86,21 +111,24 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
-    fn get_stones(self: MancalaGame, selected_pit: u32) -> u8{
+    fn get_stones(self: MancalaGame, player: GamePlayer, selected_pit: u8) -> u8{
+        
         let mut stones: u8 = match selected_pit {
             0 => panic!("Invalid pit selected"),
-            1 => if self.current_player == self.player_one { self.p1_pit1 } else { self.p2_pit1 },
-            2 => if self.current_player == self.player_one { self.p1_pit2 } else { self.p2_pit2 },
-            3 => if self.current_player == self.player_one { self.p1_pit3 } else { self.p2_pit3 },
-            4 => if self.current_player == self.player_one { self.p1_pit4 } else { self.p2_pit4 },
-            5 => if self.current_player == self.player_one { self.p1_pit5 } else { self.p2_pit5 },
-            6 => if self.current_player == self.player_one { self.p1_pit6 } else { self.p2_pit6 },
+            1 => player.pit1,
+            2 => player.pit2,
+            3 => player.pit3,
+            4 => player.pit4,
+            5 => player.pit5,
+            6 => player.pit6,
             _ => panic!("Invalid pit selected"),
         };
+        println!("selected pit {}", selected_pit);
+        println!("stones {}", player.pit1);
         stones
     }
 
-    fn clear_pit(ref self: MancalaGame, selected_pit: u32){
+    fn clear_pit(ref self: MancalaGame, player: GamePlayer, selected_pit: u8){
         match selected_pit {
             0 => panic!("Invalid pit selected"),
             1 => if self.current_player == self.player_one { self.p1_pit1 = 0 } else { self.p2_pit1 = 0 },
@@ -113,7 +141,7 @@ impl MancalaImpl of MancalaGameTrait{
         };
     }
 
-    fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u32){
+    fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u8){
         let mut current_pit = selected_pit;
         while stones > 0 {
             // todo handle store logic so dont just wrap around
@@ -140,4 +168,9 @@ impl MancalaImpl of MancalaGameTrait{
 
     fn switch_player(self: MancalaGame){}
     fn capture(self: MancalaGame){}
+
+    fn is_game_finished(self: MancalaGame)-> bool{
+        // self.player1.is_finished() & self.player2.is_finished()
+        true
+    }
 }

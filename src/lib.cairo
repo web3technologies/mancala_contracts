@@ -4,6 +4,7 @@ mod systems {
 
 mod models {
     mod mancala_game;
+    mod player;
 }
 
 mod tests {
