@@ -29,7 +29,7 @@ struct MancalaGame {
 trait MancalaGameTrait{
     fn get_stones(self: MancalaGame, player:GamePlayer, selected_pit: u8) -> u8;
     fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8);
-    fn distribute_stones(ref self: MancalaGame, ref player: GamePlayer, ref stones: u8, selected_pit: u8);
+    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref oponent: GamePlayer, ref stones: u8, selected_pit: u8);
     fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u8);
     // todo implement logic
     fn switch_player(self: MancalaGame);
@@ -62,9 +62,9 @@ impl MancalaImpl of MancalaGameTrait{
         let player_one: GamePlayer = get!(world, (self.player_one, self.game_id), (GamePlayer));
         let player_two: GamePlayer = get!(world, (self.player_two, self.game_id), (GamePlayer));
         let current_player_address: felt252 = player_one.address.into();
-        let other_player_address: felt252 = player_two.address.into();
+        let oponent_address: felt252 = player_two.address.into();
         println!("real test pit:{} adress:{}", player_one.pit1, current_player_address);
-        println!("real test2 pit:{} addres:{}", player_two.pit1, other_player_address);
+        println!("real test2 pit:{} addres:{}", player_two.pit1, oponent_address);
         // the first player in the tupple is the current player
         if (self.current_player == player_one.address){
             (player_one, player_two)
@@ -113,29 +113,37 @@ impl MancalaImpl of MancalaGameTrait{
         };
     }
 
-    fn distribute_stones(ref self: MancalaGame, ref player: GamePlayer, ref stones: u8, selected_pit: u8){
-        let mut current_pit = selected_pit;
+    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref oponent: GamePlayer, ref stones: u8, selected_pit: u8){
+        // go to next pit
+        let mut current_pit = selected_pit + 1;
         while stones > 0 {
-            // todo handle store logic so dont just wrap around
-            current_pit = (current_pit + 1) % 6; // wrap around to the first pit
-            if current_pit == selected_pit {
-                continue; // skip the originally selected pit as it's been emptied
-            }
             match current_pit {
                 0 => panic!("Invalid pit selected"), 
-                1 => {player.pit1 += 1;},
-                2 => {player.pit2 += 1;},
-                3 => {player.pit3 += 1;},
-                4 => {player.pit4 += 1;},
-                5 => {player.pit5 += 1;},
-                6 => {player.pit6 += 1;},
-                _ => panic!("Invalid pit selected"),
+                1 => {current_player.pit1 += 1;},
+                2 => {current_player.pit2 += 1;},
+                3 => {current_player.pit3 += 1;},
+                4 => {current_player.pit4 += 1;},
+                5 => {current_player.pit5 += 1;},
+                6 => {current_player.pit6 += 1;},
+                7 => {
+                    current_player.mancala += 1;
+                    if stones == 1 {
+                        current_player;
+                    }
+                },
+                8 => oponent.pit1 += 1,
+                9 => oponent.pit2 += 1,
+                10 => oponent.pit3 += 1,
+                11 => oponent.pit4 += 1,
+                12 => oponent.pit5 += 1,
+                13 => oponent.pit6 += 1,
+                _ => current_pit = 1
             };
-
-            // if stones == 1 and next pit == 0 then capture players opposite pit
-    
             stones -= 1;
+            current_pit += 1;
         };
+        self.capture();
+        self.switch_player();
     }
 
     fn switch_player(self: MancalaGame){}

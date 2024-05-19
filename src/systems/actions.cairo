@@ -50,22 +50,18 @@ mod actions {
             let player: ContractAddress = get_caller_address();
             
             mancala_game.validate_move(player, selected_pit);
-            let (mut current_player, mut other_player) = mancala_game.get_players(world);
+            let (mut current_player, mut oponent) = mancala_game.get_players(world);
             // Get stones from the selected pit and validate it's not empty
             let mut stones = mancala_game.get_stones(current_player, selected_pit);
             if stones == 0 {
                 panic!("Selected pit is empty. Choose another pit.");
             }
             mancala_game.clear_pit(ref current_player, selected_pit);
-            mancala_game.distribute_stones(ref current_player, ref stones, selected_pit);
-            // todo implement
-            mancala_game.capture();
-            // todo implement
-            mancala_game.switch_player();
+            mancala_game.distribute_stones(ref current_player, ref oponent, ref stones, selected_pit);
 
             let is_game_finished:bool = mancala_game.is_game_finished();
 
-            set!(world, (mancala_game, current_player, other_player));
+            set!(world, (mancala_game, current_player, oponent));
             is_game_finished
         }
         
