@@ -7,7 +7,9 @@ use mancala::models::player::{GamePlayer, GamePlayerTrait};
 #[dojo::interface]
 trait IActions {
     fn create_game(player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame;
-    fn move(game_id: u128, selected_pit: u8) -> bool;
+    fn move(game_id: u128, selected_pit: u8);
+    fn get_score(game_id: u128) -> (u8, u8);
+    fn is_game_finished(game_id: u128) -> bool;
 }
 
 // dojo decorator
@@ -35,7 +37,7 @@ mod actions {
             mancala_game
         }
 
-        fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u8) -> bool {
+        fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u8) {
             // world.foo();
             let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
             let player: ContractAddress = get_caller_address();
@@ -50,10 +52,21 @@ mod actions {
             mancala_game.clear_pit(ref current_player, selected_pit);
             mancala_game.distribute_stones(ref current_player, ref oponent, ref stones, selected_pit);
 
-            let is_game_finished:bool = mancala_game.is_game_finished();
-
             set!(world, (mancala_game, current_player, oponent));
-            is_game_finished
+        }
+
+        fn get_score(world: IWorldDispatcher, game_id: u128) -> (u8, u8){
+            let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
+            let player_one: GamePlayer = get!(world, (mancala_game.player_one, mancala_game.game_id), (GamePlayer));
+            let player_two: GamePlayer = get!(world, (mancala_game.player_two, mancala_game.game_id), (GamePlayer));
+            mancala_game.get_score(player_one, player_two)
+        }
+
+        fn is_game_finished(world: IWorldDispatcher, game_id: u128) -> bool{
+            let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
+            let player_one: GamePlayer = get!(world, (mancala_game.player_one, mancala_game.game_id), (GamePlayer));
+            let player_two: GamePlayer = get!(world, (mancala_game.player_two, mancala_game.game_id), (GamePlayer));
+            mancala_game.is_game_finished(player_one, player_two)
         }
         
     }

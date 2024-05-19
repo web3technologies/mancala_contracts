@@ -33,7 +33,7 @@ trait MancalaGameTrait{
     fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer);
     fn capture(self: MancalaGame, last_pit: u8, ref current_player: GamePlayer, ref opponent: GamePlayer);
     fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame;
-    fn is_game_finished(self: MancalaGame) -> bool;
+    fn is_game_finished(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> bool;
     fn get_players(self: MancalaGame, world: IWorldDispatcher) -> (GamePlayer, GamePlayer);
     fn get_score(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> (u8, u8);
 }
@@ -203,9 +203,8 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
-    fn is_game_finished(self: MancalaGame)-> bool{
-        // self.player1.is_finished() & self.player2.is_finished()
-        true
+    fn is_game_finished(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer)-> bool{
+        player_one.is_finished() & player_two.is_finished()
     }
 
     fn get_score(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> (u8, u8){
