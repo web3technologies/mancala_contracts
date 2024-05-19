@@ -14,9 +14,7 @@ mod tests {
         models::{player::{GamePlayer}}
     };
 
-    #[test]
-    #[available_gas(3000000000000)]
-    fn test_create_game(){
+    fn create_game() -> (GamePlayer, GamePlayer, IWorldDispatcher, IActionsDispatcher, MancalaGame){
         let player_one_address = starknet::contract_address_const::<0x0>();
         let player_two_address = starknet::contract_address_const::<0x456>();
         // models
@@ -31,6 +29,13 @@ mod tests {
         let player_one: GamePlayer =  get!(world, (player_one_address, game.game_id), (GamePlayer));
         let player_two: GamePlayer =  get!(world, (player_one_address, game.game_id), (GamePlayer));
 
+        (player_one, player_two, world, actions_system, game)
+    }
+
+    #[test]
+    #[available_gas(3000000000000)]
+    fn test_create_game(){
+        let (player_one, player_two, _, _, _) = create_game();
         assert(player_one.pit1 == 4, 'p1 pit 1 not init correctly');
         assert(player_one.pit2 == 4, 'p1 pit 2 not init correctly');
         assert(player_one.pit3 == 4, 'p1 pit 3 not init correctly');
@@ -48,23 +53,12 @@ mod tests {
     #[test]
     #[available_gas(3000000000000)]
     fn test_move() {
-        // caller
-        let player_one_address = starknet::contract_address_const::<0x0>();
-        let player_two_address = starknet::contract_address_const::<0x456>();
-        // models
-        let mut models = array![mancala_game::TEST_CLASS_HASH];
-        // deploy world with models
-        let world = spawn_test_world(models);
-
-        // deploy systems contract
-        let contract_address = world.deploy_contract('salt', actions::TEST_CLASS_HASH.try_into().unwrap());
-        let actions_system = IActionsDispatcher { contract_address: contract_address };
-        let game: MancalaGame = actions_system.create_game(player_one_address, player_two_address);
-
+        let (player_one, _, world, actions_system, game) = create_game();
         let selected_pit: u8 = 1;
         actions_system.move(game.game_id, selected_pit);
         let game: MancalaGame = get!(world, game.game_id, (MancalaGame));
-        let player_one: GamePlayer =  get!(world, (player_one_address, game.game_id), (GamePlayer));
+        let player_one: GamePlayer =  get!(world, (player_one.address, game.game_id), (GamePlayer));
+
         assert!(player_one.pit1 == 0, "pit1 not cleared");
         assert!(player_one.pit2 == 5, "pit2 does not have correct count");
         assert!(player_one.pit3 == 5, "pit3 does not have correct count");
