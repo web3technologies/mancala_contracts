@@ -23,27 +23,13 @@ struct MancalaGame {
     winner: ContractAddress,
     score: u8,
     is_finished: bool,
-    p1_pit1: u8,
-    p1_pit2: u8,
-    p1_pit3: u8,
-    p1_pit4: u8,
-    p1_pit5: u8,
-    p1_pit6: u8,
-    p2_pit1: u8,
-    p2_pit2: u8,
-    p2_pit3: u8,
-    p2_pit4: u8,
-    p2_pit5: u8,
-    p2_pit6: u8,
-    p1_store: u256,
-    p2_store: u256,
 }
 
 
 trait MancalaGameTrait{
     fn get_stones(self: MancalaGame, player:GamePlayer, selected_pit: u8) -> u8;
-    fn clear_pit(ref self: MancalaGame, player: GamePlayer, selected_pit: u8);
-    fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u8);
+    fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8);
+    fn distribute_stones(ref self: MancalaGame, ref player: GamePlayer, ref stones: u8, selected_pit: u8);
     fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u8);
     // todo implement logic
     fn switch_player(self: MancalaGame);
@@ -66,20 +52,6 @@ impl MancalaImpl of MancalaGameTrait{
             current_player: player_one,
             score: 0,
             is_finished: false,
-            p1_pit1: 4,
-            p1_pit2: 4,
-            p1_pit3: 4,
-            p1_pit4: 4,
-            p1_pit5: 4,
-            p1_pit6: 4,
-            p2_pit1: 4,
-            p2_pit2: 4,
-            p2_pit3: 4,
-            p2_pit4: 4,
-            p2_pit5: 4,
-            p2_pit6: 4,
-            p1_store: 0,
-            p2_store: 0,
         };
         let active_player_str: felt252 = mancala_game.current_player.into();
         println!("active should be {}", active_player_str);
@@ -128,20 +100,20 @@ impl MancalaImpl of MancalaGameTrait{
         stones
     }
 
-    fn clear_pit(ref self: MancalaGame, player: GamePlayer, selected_pit: u8){
+    fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8){
         match selected_pit {
             0 => panic!("Invalid pit selected"),
-            1 => if self.current_player == self.player_one { self.p1_pit1 = 0 } else { self.p2_pit1 = 0 },
-            2 => if self.current_player == self.player_one { self.p1_pit2 = 0 } else { self.p2_pit2 = 0 },
-            3 => if self.current_player == self.player_one { self.p1_pit3 = 0 } else { self.p2_pit3 = 0 },
-            4 => if self.current_player == self.player_one { self.p1_pit4 = 0 } else { self.p2_pit4 = 0 },
-            5 => if self.current_player == self.player_one { self.p1_pit5 = 0 } else { self.p2_pit5 = 0 },
-            6 => if self.current_player == self.player_one { self.p1_pit6 = 0 } else { self.p2_pit6 = 0 },
+            1 => {player.pit1 = 0;},
+            2 => {player.pit2 = 0;},
+            3 => {player.pit3 = 0;},
+            4 => {player.pit4 = 0;},
+            5 => {player.pit5 = 0;},
+            6 => {player.pit6 = 0;},
             _ => panic!("Invalid pit selected"),
         };
     }
 
-    fn distribute_stones(ref self: MancalaGame, ref stones: u8, selected_pit: u8){
+    fn distribute_stones(ref self: MancalaGame, ref player: GamePlayer, ref stones: u8, selected_pit: u8){
         let mut current_pit = selected_pit;
         while stones > 0 {
             // todo handle store logic so dont just wrap around
@@ -151,12 +123,12 @@ impl MancalaImpl of MancalaGameTrait{
             }
             match current_pit {
                 0 => panic!("Invalid pit selected"), 
-                1 => if self.current_player == self.player_one { self.p1_pit1 += 1 } else { self.p2_pit1 += 1 },
-                2 => if self.current_player == self.player_one { self.p1_pit2 += 1 } else { self.p2_pit2 += 1 },
-                3 => if self.current_player == self.player_one { self.p1_pit3 += 1 } else { self.p2_pit3 += 1 },
-                4 => if self.current_player == self.player_one { self.p1_pit4 += 1 } else { self.p2_pit4 += 1 },
-                5 => if self.current_player == self.player_one { self.p1_pit5 += 1 } else { self.p2_pit5 += 1 },
-                6 => if self.current_player == self.player_one { self.p1_pit6 += 1 } else { self.p2_pit6 += 1 },
+                1 => {player.pit1 += 1;},
+                2 => {player.pit2 += 1;},
+                3 => {player.pit3 += 1;},
+                4 => {player.pit4 += 1;},
+                5 => {player.pit5 += 1;},
+                6 => {player.pit6 += 1;},
                 _ => panic!("Invalid pit selected"),
             };
 
