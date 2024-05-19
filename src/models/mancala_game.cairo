@@ -53,18 +53,12 @@ impl MancalaImpl of MancalaGameTrait{
             score: 0,
             is_finished: false,
         };
-        let active_player_str: felt252 = mancala_game.current_player.into();
-        println!("active should be {}", active_player_str);
         mancala_game
     }
 
     fn get_players(self: MancalaGame, world: IWorldDispatcher)-> (GamePlayer, GamePlayer){
         let player_one: GamePlayer = get!(world, (self.player_one, self.game_id), (GamePlayer));
         let player_two: GamePlayer = get!(world, (self.player_two, self.game_id), (GamePlayer));
-        let current_player_address: felt252 = player_one.address.into();
-        let oponent_address: felt252 = player_two.address.into();
-        println!("real test pit:{} adress:{}", player_one.pit1, current_player_address);
-        println!("real test2 pit:{} addres:{}", player_two.pit1, oponent_address);
         // the first player in the tupple is the current player
         if (self.current_player == player_one.address){
             (player_one, player_two)
@@ -95,8 +89,6 @@ impl MancalaImpl of MancalaGameTrait{
             6 => player.pit6,
             _ => panic!("Invalid pit selected"),
         };
-        println!("selected pit {}", selected_pit);
-        println!("stones {}", player.pit1);
         stones
     }
 

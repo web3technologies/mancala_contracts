@@ -43,8 +43,6 @@ impl GamePlayerImpl of GamePlayerTrait{
             pit6: 4_u8,
             mancala: 0
         };
-        println!("player new function:");
-        println!("{}", game_player.pit1);
         game_player
     }
     

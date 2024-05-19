@@ -29,18 +29,9 @@ mod actions {
             let game_id: GameId = get!(world, curr_world_id, (GameId));
             let p_one = GamePlayerTrait::new(game_id.game_id, player_1);
             let p_two = GamePlayerTrait::new(game_id.game_id, player_2);
-
-            println!("what about here: {}", p_one.pit1);
-
             let mancala_game: MancalaGame = MancalaGameTrait::new(game_id.game_id, player_1, player_2);
-            println!("wait a minute");
             set!(world, (p_one, p_two, mancala_game));
-
             set!(world, (GameId{world_id: curr_world_id, game_id: game_id.game_id + 1}));
-            
-            let test_player: GamePlayer = get!(world, (player_1, game_id.game_id), (GamePlayer));
-            println!("test player here: {}", test_player.pit1);
-            println!("game_id: {}", test_player.game_id);
             mancala_game
         }
 
