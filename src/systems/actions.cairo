@@ -6,6 +6,7 @@ use mancala::models::player::{GamePlayer, GamePlayerTrait};
 // define the interface
 #[dojo::interface]
 trait IActions {
+    fn create_initial_game_id();
     fn create_game(player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame;
     fn move(game_id: u128, selected_pit: u8);
     fn get_score(game_id: u128) -> (u8, u8);
@@ -26,14 +27,23 @@ mod actions {
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
 
+        fn create_initial_game_id(world: IWorldDispatcher){
+            let existing_game_id = get!(world, 1, (GameId));
+            if (existing_game_id.game_id > 0){
+                panic!("error game id already created");
+            }
+            let game_id: GameId = GameId{id: 1, game_id: 1};
+            set!(world, (game_id));
+        }
+
+
         fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame{
-            let curr_world_id = world.uuid();
-            let game_id: GameId = get!(world, curr_world_id, (GameId));
+            let mut game_id: GameId = get!(world, 1, (GameId));
             let p_one = GamePlayerTrait::new(game_id.game_id, player_1);
             let p_two = GamePlayerTrait::new(game_id.game_id, player_2);
             let mancala_game: MancalaGame = MancalaGameTrait::new(game_id.game_id, player_1, player_2);
-            set!(world, (p_one, p_two, mancala_game));
-            set!(world, (GameId{world_id: curr_world_id, game_id: game_id.game_id + 1}));
+            game_id.game_id += 1;
+            set!(world, (p_one, p_two, mancala_game, game_id));
             mancala_game
         }
 
@@ -44,13 +54,13 @@ mod actions {
             
             mancala_game.validate_move(player, selected_pit);
             let (mut current_player, mut oponent) = mancala_game.get_players(world);
-            // Get stones from the selected pit and validate it's not empty
-            let mut stones = mancala_game.get_stones(current_player, selected_pit);
-            if stones == 0 {
+            // Get seeds from the selected pit and validate it's not empty
+            let mut seeds = mancala_game.get_seeds(current_player, selected_pit);
+            if seeds == 0 {
                 panic!("Selected pit is empty. Choose another pit.");
             }
             mancala_game.clear_pit(ref current_player, selected_pit);
-            mancala_game.distribute_stones(ref current_player, ref oponent, ref stones, selected_pit);
+            mancala_game.distribute_seeds(ref current_player, ref oponent, ref seeds, selected_pit);
 
             set!(world, (mancala_game, current_player, oponent));
         }

@@ -9,11 +9,11 @@ use mancala::models::player::{GamePlayer, GamePlayerTrait};
 #[derive(Model, Copy, Drop, Serde)]
 struct GameId {
     #[key]
-    world_id: u32,
+    id: u32,
     game_id: u128
 }
 
-#[derive(Model, Copy, Drop, Serde)]
+#[derive(Model, Copy, Drop, Serde, Debug)]
 struct MancalaGame {
     #[key]
     game_id: u128,
@@ -26,9 +26,9 @@ struct MancalaGame {
 
 
 trait MancalaGameTrait{
-    fn get_stones(self: MancalaGame, player:GamePlayer, selected_pit: u8) -> u8;
+    fn get_seeds(self: MancalaGame, player:GamePlayer, selected_pit: u8) -> u8;
     fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8);
-    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref stones: u8, selected_pit: u8);
+    fn distribute_seeds(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref seeds: u8, selected_pit: u8);
     fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u8);
     fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer);
     fn capture(self: MancalaGame, last_pit: u8, ref current_player: GamePlayer, ref opponent: GamePlayer);
@@ -74,9 +74,9 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
-    fn get_stones(self: MancalaGame, player: GamePlayer, selected_pit: u8) -> u8{
+    fn get_seeds(self: MancalaGame, player: GamePlayer, selected_pit: u8) -> u8{
         
-        let mut stones: u8 = match selected_pit {
+        let mut seeds: u8 = match selected_pit {
             0 => panic!("Invalid pit selected"),
             1 => player.pit1,
             2 => player.pit2,
@@ -86,7 +86,7 @@ impl MancalaImpl of MancalaGameTrait{
             6 => player.pit6,
             _ => panic!("Invalid pit selected"),
         };
-        stones
+        seeds
     }
 
     fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8){
@@ -102,11 +102,11 @@ impl MancalaImpl of MancalaGameTrait{
         };
     }
 
-    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref stones: u8, selected_pit: u8){
+    fn distribute_seeds(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref seeds: u8, selected_pit: u8){
         // go to next pit
         let mut current_pit = selected_pit + 1;
         let mut last_pit = current_pit;
-        while stones > 0 {
+        while seeds > 0 {
             match current_pit {
                 0 => panic!("Invalid pit selected"), 
                 1 => {current_player.pit1 += 1;},
@@ -124,9 +124,9 @@ impl MancalaImpl of MancalaGameTrait{
                 13 => {opponent.pit6 += 1},
                 _ => {current_pit = 1}
             };
-            stones -= 1;
-            current_pit += 1;
+            seeds -= 1;
             last_pit = current_pit;
+            current_pit += 1;
         };
         self.handle_player_switch(last_pit, opponent);
         self.capture(last_pit, ref current_player, ref opponent);
@@ -136,7 +136,7 @@ impl MancalaImpl of MancalaGameTrait{
     fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer){
         if last_pit != 7 {
             self.current_player = opponent.address;
-        } 
+        }
     }
 
     // todo make this a private function
@@ -153,42 +153,42 @@ impl MancalaImpl of MancalaGameTrait{
                 _ => panic!("Not a valid pit for capture") 
             };
             if pit_value == 1 {
-                let opposite_pit_stones = match last_pit {
+                let opposite_pit_seeds = match last_pit {
                     0 => panic!("Invalid pit selected"),
                     1 => {
-                        let stones = opponent.pit6;
+                        let seeds = opponent.pit6;
                         opponent.pit6 = 0;
-                        stones
+                        seeds
                     },
                     2 => {
-                        let stones = opponent.pit5;
+                        let seeds = opponent.pit5;
                         opponent.pit5 = 0;
-                        stones
+                        seeds
                     },
                     3 => {
-                        let stones = opponent.pit4;
+                        let seeds = opponent.pit4;
                         opponent.pit4 = 0;
-                        stones
+                        seeds
                     },
                     4 => {
-                        let stones = opponent.pit3;
+                        let seeds = opponent.pit3;
                         opponent.pit3 = 0;
-                        stones
+                        seeds
                     },
                     5 => {
-                        let stones = opponent.pit2;
+                        let seeds = opponent.pit2;
                         opponent.pit2 = 0;
-                        stones
+                        seeds
                     },
                     6 => {
-                        let stones = opponent.pit1;
+                        let seeds = opponent.pit1;
                         opponent.pit1 = 0;
-                        stones
+                        seeds
                     },
                     _ => panic!("Not a valid pit for capture") ,
                 };
-                // Transfer stones from the opposite pit to the current player's Mancala
-                current_player.mancala += opposite_pit_stones + 1;
+                // Transfer seeds from the opposite pit to the current player's Mancala
+                current_player.mancala += opposite_pit_seeds + 1;
                 match last_pit {
                     0 => panic!("Invalid pit selected"),
                     1 => current_player.pit1 = 0,

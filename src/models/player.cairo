@@ -9,7 +9,7 @@ struct Player {
     games_lost: u256
 }
 
-#[derive(Model, Copy, Drop, Serde)]
+#[derive(Model, Copy, Drop, Serde, Debug)]
 struct GamePlayer {
     #[key]
     address: ContractAddress,
