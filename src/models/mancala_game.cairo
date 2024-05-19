@@ -31,10 +31,8 @@ trait MancalaGameTrait{
     fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8);
     fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref stones: u8, selected_pit: u8);
     fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u8);
-    // todo implement logic
-    fn handle_player_switch(ref self: MancalaGame, stones: u8, current_pit: u8, opponent: GamePlayer);
-    // todo implement logic
-    fn capture(self: MancalaGame);
+    fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer);
+    fn capture(self: MancalaGame, last_pit: u8, ref current_player: GamePlayer, ref opponent: GamePlayer);
     fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame;
     fn is_game_finished(self: MancalaGame) -> bool;
     fn get_players(self: MancalaGame, world: IWorldDispatcher) -> (GamePlayer, GamePlayer);
@@ -73,7 +71,7 @@ impl MancalaImpl of MancalaGameTrait{
             panic!("You are not the current player");
         }
         if selected_pit < 1 || selected_pit > 6 {
-            panic!("Invalid pit, choose between 0 and 5");
+            panic!("Invalid pit, choose between 1 and 6");
         }
     }
 
@@ -108,6 +106,7 @@ impl MancalaImpl of MancalaGameTrait{
     fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref stones: u8, selected_pit: u8){
         // go to next pit
         let mut current_pit = selected_pit + 1;
+        let mut last_pit = current_pit;
         while stones > 0 {
             match current_pit {
                 0 => panic!("Invalid pit selected"), 
@@ -126,22 +125,84 @@ impl MancalaImpl of MancalaGameTrait{
                 13 => {opponent.pit6 += 1},
                 _ => {current_pit = 1}
             };
-            self.handle_player_switch(stones, current_pit, opponent);
             stones -= 1;
             current_pit += 1;
+            last_pit = current_pit;
         };
-        self.capture();
+        self.handle_player_switch(last_pit, opponent);
+        self.capture(last_pit, ref current_player, ref opponent);
     }
 
-    fn handle_player_switch(ref self: MancalaGame, stones: u8, current_pit: u8, opponent: GamePlayer){
-        if stones == 1_u8 {
-            if current_pit != 7 {
-                self.current_player = opponent.address;
-            } 
-        };
+    // todo make this a private function
+    fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer){
+        if last_pit != 7 {
+            self.current_player = opponent.address;
+        } 
     }
 
-    fn capture(self: MancalaGame){}
+    // todo make this a private function
+    fn capture(self: MancalaGame, last_pit: u8, ref current_player: GamePlayer, ref opponent: GamePlayer){
+        if last_pit >= 1 && last_pit <= 6 {
+            let pit_value = match last_pit {
+                0 => panic!("Invalid pit selected"),
+                1 => current_player.pit1,
+                2 => current_player.pit2,
+                3 => current_player.pit3,
+                4 => current_player.pit4,
+                5 => current_player.pit5,
+                6 => current_player.pit6,
+                _ => panic!("Not a valid pit for capture") 
+            };
+            if pit_value == 1 {
+                let opposite_pit_stones = match last_pit {
+                    0 => panic!("Invalid pit selected"),
+                    1 => {
+                        let stones = opponent.pit6;
+                        opponent.pit6 = 0;
+                        stones
+                    },
+                    2 => {
+                        let stones = opponent.pit5;
+                        opponent.pit5 = 0;
+                        stones
+                    },
+                    3 => {
+                        let stones = opponent.pit4;
+                        opponent.pit4 = 0;
+                        stones
+                    },
+                    4 => {
+                        let stones = opponent.pit3;
+                        opponent.pit3 = 0;
+                        stones
+                    },
+                    5 => {
+                        let stones = opponent.pit2;
+                        opponent.pit2 = 0;
+                        stones
+                    },
+                    6 => {
+                        let stones = opponent.pit1;
+                        opponent.pit1 = 0;
+                        stones
+                    },
+                    _ => panic!("Not a valid pit for capture") ,
+                };
+                // Transfer stones from the opposite pit to the current player's Mancala
+                current_player.mancala += opposite_pit_stones + 1;
+                match last_pit {
+                    0 => panic!("Invalid pit selected"),
+                    1 => current_player.pit1 = 0,
+                    2 => current_player.pit2 = 0,
+                    3 => current_player.pit3 = 0,
+                    4 => current_player.pit4 = 0,
+                    5 => current_player.pit5 = 0,
+                    6 => current_player.pit6 = 0,
+                    _ => {panic!("not valid");},
+                }
+            }
+        }
+    }
 
     fn is_game_finished(self: MancalaGame)-> bool{
         // self.player1.is_finished() & self.player2.is_finished()
