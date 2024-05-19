@@ -66,5 +66,6 @@ mod tests {
         assert!(player_one.pit5 == 5, "pit5 does not have correct count");
         assert!(player_one.pit6 == 4, "pit5 does not have correct count");
         assert!(game_after_move.current_player == player_two.address, "current player did not switch");
+        assert!(actions_system.is_game_finished(game.game_id) == false, "game should not be finished");
     }
 }
