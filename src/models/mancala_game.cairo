@@ -5,11 +5,13 @@ use dojo::world::{IWorldDispatcher, IWorldDispatcherTrait};
 
 use mancala::models::player::{GamePlayer, GamePlayerTrait};
 
-
+// this is the model to track the 
 #[derive(Model, Copy, Drop, Serde)]
 struct GameId {
     #[key]
-    id: u32,
+    // statically set to 1
+    id: u32, 
+    // increments to track the game id
     game_id: u128
 }
 
@@ -20,8 +22,10 @@ struct MancalaGame {
     player_one: ContractAddress,
     player_two: ContractAddress,
     current_player: ContractAddress,
-    winner: ContractAddress,
-    is_finished: bool,
+    winner: ContractAddress, // todo implement logic to set this state
+    is_finished: bool,  // todo implement logic to set this state
+    // also maybe better to use and enum to track the status of the game
+    // PENDING, IN_PROGRESS, FINISHED, FORFEITED
 }
 
 
@@ -41,6 +45,7 @@ trait MancalaGameTrait{
 
 impl MancalaImpl of MancalaGameTrait{
 
+    // create the game
     fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame{
         let mancala_game: MancalaGame = MancalaGame {
             game_id: game_id,
@@ -53,6 +58,8 @@ impl MancalaImpl of MancalaGameTrait{
         mancala_game
     }
 
+    // get the current player and the other player
+    // the current player is the player who has the current turn
     fn get_players(self: MancalaGame, world: IWorldDispatcher)-> (GamePlayer, GamePlayer){
         let player_one: GamePlayer = get!(world, (self.player_one, self.game_id), (GamePlayer));
         let player_two: GamePlayer = get!(world, (self.player_two, self.game_id), (GamePlayer));
@@ -64,7 +71,8 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
-
+    // perform validation to ensure that the caller is the current player 
+    // also validate that the selected pit is within range
     fn validate_move(self: MancalaGame, player: ContractAddress, selected_pit: u8){
         if player != self.current_player {
             panic!("You are not the current player");
@@ -74,6 +82,7 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
+    // get the seeds in a pit
     fn get_seeds(self: MancalaGame, player: GamePlayer, selected_pit: u8) -> u8{
         
         let mut seeds: u8 = match selected_pit {
@@ -89,6 +98,7 @@ impl MancalaImpl of MancalaGameTrait{
         seeds
     }
 
+    // clear the seeds in the selected pit
     fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8){
         match selected_pit {
             0 => panic!("Invalid pit selected"),
@@ -102,6 +112,9 @@ impl MancalaImpl of MancalaGameTrait{
         };
     }
 
+    // distribute the seeds to the pits in the game
+    // additonally logic to check to switch to the opponent player is run
+    // then there is a check for a capture
     fn distribute_seeds(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref seeds: u8, selected_pit: u8){
         // go to next pit
         let mut current_pit = selected_pit + 1;
@@ -124,8 +137,8 @@ impl MancalaImpl of MancalaGameTrait{
                 13 => {opponent.pit6 += 1},
                 _ => {current_pit = 1}
             };
-            seeds -= 1;
             last_pit = current_pit;
+            seeds -= 1;
             current_pit += 1;
         };
         self.handle_player_switch(last_pit, opponent);
@@ -134,12 +147,14 @@ impl MancalaImpl of MancalaGameTrait{
 
     // todo make this a private function
     fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer){
+        // if the last pit is not the mancala then switch players
         if last_pit != 7 {
             self.current_player = opponent.address;
         }
     }
 
     // todo make this a private function
+    // perform the capture logic
     fn capture(self: MancalaGame, last_pit: u8, ref current_player: GamePlayer, ref opponent: GamePlayer){
         if last_pit >= 1 && last_pit <= 6 {
             let pit_value = match last_pit {
@@ -203,10 +218,12 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
+    // check to see if either players pits are all empty
     fn is_game_finished(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer)-> bool{
-        player_one.is_finished() & player_two.is_finished()
+        player_one.is_finished() || player_two.is_finished()
     }
 
+    // get the mancalas of players
     fn get_score(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> (u8, u8){
         (player_one.mancala, player_two.mancala)
     }

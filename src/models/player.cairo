@@ -1,6 +1,6 @@
 use starknet::ContractAddress;
 
-
+// useful for the leaderboard to track statistics
 #[derive(Model, Copy, Drop, Serde)]
 struct Player {
     #[key]
@@ -9,6 +9,7 @@ struct Player {
     games_lost: u256
 }
 
+// The GamePlayer is the store for the state in each game
 #[derive(Model, Copy, Drop, Serde, Debug)]
 struct GamePlayer {
     #[key]
@@ -31,6 +32,7 @@ trait GamePlayerTrait{
 
 impl GamePlayerImpl of GamePlayerTrait{
 
+    // logic to create the game player
     fn new(game_id: u128, address: ContractAddress) -> GamePlayer{
         let game_player = GamePlayer{
             address: address,
@@ -46,6 +48,7 @@ impl GamePlayerImpl of GamePlayerTrait{
         game_player
     }
     
+    // check to see if a players pits are all empty
     fn is_finished(self: GamePlayer) -> bool {
 
         let mut count: u8 = 1;

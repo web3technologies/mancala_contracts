@@ -8,7 +8,7 @@ use mancala::models::player::{GamePlayer, GamePlayerTrait};
 trait IActions {
     fn create_initial_game_id();
     fn create_game(player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame;
-    fn move(game_id: u128, selected_pit: u8);
+    fn move(game_id: u128, selected_pit: u8)-> ContractAddress;
     fn get_score(game_id: u128) -> (u8, u8);
     fn is_game_finished(game_id: u128) -> bool;
 }
@@ -26,17 +26,23 @@ mod actions {
 
     #[abi(embed_v0)]
     impl ActionsImpl of IActions<ContractState> {
-
+        
+        // logic to create the global game id tracker
+        // this function should only be run once
         fn create_initial_game_id(world: IWorldDispatcher){
             let existing_game_id = get!(world, 1, (GameId));
             if (existing_game_id.game_id > 0){
-                panic!("error game id already created");
+                panic!("error global game id already created");
             }
             let game_id: GameId = GameId{id: 1, game_id: 1};
             set!(world, (game_id));
         }
 
-
+        // create a game passing in two players
+        // todo better manage this logic
+        // -- how is the game first initiated?
+        //  - Player One creates the game and then someone joins?
+        //  - Or both players select at the same time?
         fn create_game(world: IWorldDispatcher, player_1: ContractAddress, player_2: ContractAddress) -> MancalaGame{
             let mut game_id: GameId = get!(world, 1, (GameId));
             let p_one = GamePlayerTrait::new(game_id.game_id, player_1);
@@ -47,8 +53,8 @@ mod actions {
             mancala_game
         }
 
-        fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u8) {
-            // world.foo();
+        // taking in the game id and the players selected pit, make the move performing all logic
+        fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u8) -> ContractAddress{
             let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
             let player: ContractAddress = get_caller_address();
             
@@ -63,8 +69,11 @@ mod actions {
             mancala_game.distribute_seeds(ref current_player, ref oponent, ref seeds, selected_pit);
 
             set!(world, (mancala_game, current_player, oponent));
+            // return the current player so client has ability to know
+            mancala_game.current_player
         }
 
+        // read function to get the score of a game taking in the game
         fn get_score(world: IWorldDispatcher, game_id: u128) -> (u8, u8){
             let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
             let player_one: GamePlayer = get!(world, (mancala_game.player_one, mancala_game.game_id), (GamePlayer));
