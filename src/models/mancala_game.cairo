@@ -29,10 +29,10 @@ struct MancalaGame {
 trait MancalaGameTrait{
     fn get_stones(self: MancalaGame, player:GamePlayer, selected_pit: u8) -> u8;
     fn clear_pit(ref self: MancalaGame, ref player: GamePlayer, selected_pit: u8);
-    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref oponent: GamePlayer, ref stones: u8, selected_pit: u8);
+    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref stones: u8, selected_pit: u8);
     fn validate_move(self:MancalaGame, player: ContractAddress,  selected_pit: u8);
     // todo implement logic
-    fn switch_player(self: MancalaGame);
+    fn handle_player_switch(ref self: MancalaGame, stones: u8, current_pit: u8, opponent: GamePlayer);
     // todo implement logic
     fn capture(self: MancalaGame);
     fn new(game_id: u128, player_one: ContractAddress, player_two: ContractAddress) -> MancalaGame;
@@ -105,7 +105,7 @@ impl MancalaImpl of MancalaGameTrait{
         };
     }
 
-    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref oponent: GamePlayer, ref stones: u8, selected_pit: u8){
+    fn distribute_stones(ref self: MancalaGame, ref current_player: GamePlayer, ref opponent: GamePlayer, ref stones: u8, selected_pit: u8){
         // go to next pit
         let mut current_pit = selected_pit + 1;
         while stones > 0 {
@@ -117,28 +117,30 @@ impl MancalaImpl of MancalaGameTrait{
                 4 => {current_player.pit4 += 1;},
                 5 => {current_player.pit5 += 1;},
                 6 => {current_player.pit6 += 1;},
-                7 => {
-                    current_player.mancala += 1;
-                    if stones == 1 {
-                        current_player;
-                    }
-                },
-                8 => oponent.pit1 += 1,
-                9 => oponent.pit2 += 1,
-                10 => oponent.pit3 += 1,
-                11 => oponent.pit4 += 1,
-                12 => oponent.pit5 += 1,
-                13 => oponent.pit6 += 1,
-                _ => current_pit = 1
+                7 => {current_player.mancala += 1;},
+                8 => {opponent.pit1 += 1;},
+                9 => {opponent.pit2 += 1;},
+                10 => {opponent.pit3 += 1;},
+                11 => {opponent.pit4 += 1;},
+                12 => {opponent.pit5 += 1;},
+                13 => {opponent.pit6 += 1},
+                _ => {current_pit = 1}
             };
+            self.handle_player_switch(stones, current_pit, opponent);
             stones -= 1;
             current_pit += 1;
         };
         self.capture();
-        self.switch_player();
     }
 
-    fn switch_player(self: MancalaGame){}
+    fn handle_player_switch(ref self: MancalaGame, stones: u8, current_pit: u8, opponent: GamePlayer){
+        if stones == 1_u8 {
+            if current_pit != 7 {
+                self.current_player = opponent.address;
+            } 
+        };
+    }
+
     fn capture(self: MancalaGame){}
 
     fn is_game_finished(self: MancalaGame)-> bool{

@@ -27,7 +27,7 @@ mod tests {
         let actions_system = IActionsDispatcher { contract_address: contract_address };
         let game: MancalaGame = actions_system.create_game(player_one_address, player_two_address);
         let player_one: GamePlayer =  get!(world, (player_one_address, game.game_id), (GamePlayer));
-        let player_two: GamePlayer =  get!(world, (player_one_address, game.game_id), (GamePlayer));
+        let player_two: GamePlayer =  get!(world, (player_two_address, game.game_id), (GamePlayer));
 
         (player_one, player_two, world, actions_system, game)
     }
@@ -53,10 +53,10 @@ mod tests {
     #[test]
     #[available_gas(3000000000000)]
     fn test_move() {
-        let (player_one, _, world, actions_system, game) = create_game();
+        let (player_one, player_two, world, actions_system, game) = create_game();
         let selected_pit: u8 = 1;
         actions_system.move(game.game_id, selected_pit);
-        let game: MancalaGame = get!(world, game.game_id, (MancalaGame));
+        let game_after_move: MancalaGame = get!(world, game.game_id, (MancalaGame));
         let player_one: GamePlayer =  get!(world, (player_one.address, game.game_id), (GamePlayer));
 
         assert!(player_one.pit1 == 0, "pit1 not cleared");
@@ -64,5 +64,6 @@ mod tests {
         assert!(player_one.pit3 == 5, "pit3 does not have correct count");
         assert!(player_one.pit4 == 5, "pit4 does not have correct count");
         assert!(player_one.pit5 == 5, "pit5 does not have correct count");
+        assert!(game_after_move.current_player == player_two.address, "current player did not switch");
     }
 }
