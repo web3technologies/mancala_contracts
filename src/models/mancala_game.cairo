@@ -30,13 +30,11 @@ struct MancalaGame {
     player_one: ContractAddress,
     player_two: ContractAddress,
     current_player: ContractAddress,
-    winner: ContractAddress, // todo implement logic to set this state
+    winner: ContractAddress,
     status: GameStatus,
     is_private: bool
     // block_created: block
 }
-
-// todo NEED TO ADD CUSTOM EVENTS AND EVENT EMISSION?
 
 
 trait MancalaGameTrait{
@@ -49,6 +47,7 @@ trait MancalaGameTrait{
     fn handle_player_switch(ref self: MancalaGame, last_pit: u8, opponent: GamePlayer);
     fn capture(self: MancalaGame, last_pit: u8, ref current_player: GamePlayer, ref opponent: GamePlayer);
     fn is_game_finished(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> bool;
+    fn set_winner(ref self: MancalaGame, current_player: GamePlayer, opponent: GamePlayer);
     fn get_players(self: MancalaGame, world: IWorldDispatcher) -> (GamePlayer, GamePlayer);
     fn get_score(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> (u8, u8);
 }
@@ -162,9 +161,6 @@ impl MancalaImpl of MancalaGameTrait{
         };
         self.handle_player_switch(last_pit, opponent);
         self.capture(last_pit, ref current_player, ref opponent);
-        if self.is_game_finished(current_player, opponent){
-            self.status = GameStatus::Finished;
-        }
     }
 
     // todo make this a private function
@@ -240,10 +236,21 @@ impl MancalaImpl of MancalaGameTrait{
         }
     }
 
+    // todo this should be made private only to be called at the end of a move and a forfeit
+    fn set_winner(ref self: MancalaGame, current_player: GamePlayer, opponent: GamePlayer){
+        if current_player.mancala > opponent.mancala{
+            self.winner = current_player.address;
+        } else {
+            self.winner = opponent.address;
+        }
+    }
+
+
     // check to see if either players pits are all empty
     fn is_game_finished(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer)-> bool{
         player_one.is_finished() || player_two.is_finished()
     }
+
 
     // get the mancalas of players
     fn get_score(self: MancalaGame, player_one: GamePlayer, player_two: GamePlayer) -> (u8, u8){
