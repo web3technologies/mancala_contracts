@@ -17,8 +17,9 @@ name = "dojo::base::base"
 
 [[contracts]]
 kind = "DojoContract"
-class_hash = "0x39d1eb5e9172f84093382dc14cbe405b801668ecebe983029618aba18fe7209"
-original_class_hash = "0x39d1eb5e9172f84093382dc14cbe405b801668ecebe983029618aba18fe7209"
+address = "0x5a5936e60c561c07cb2225ebfb7205f7d204c14f6ed5ee331a3aa989feeeb28"
+class_hash = "0x3a696c03c0da23679ff9d179c2cf5fd2e88c704f7e38b15c9e034723b99e4c2"
+original_class_hash = "0x3a696c03c0da23679ff9d179c2cf5fd2e88c704f7e38b15c9e034723b99e4c2"
 base_class_hash = "0x679177a2cb757694ac4f326d01052ff0963eac0bc2a17116a2b87badcdf6f76"
 abi = "abis/deployments/contracts/mancala_systems_actions_actions.json"
 reads = []
@@ -26,155 +27,15 @@ writes = []
 computed = []
 name = "mancala::systems::actions::actions"
 
-[[contracts]]
-kind = "DojoContract"
-class_hash = "0x55d9c7d73ce5320b6a5a333abe55319e50c0bf856630ef2e21b378d954ed6cf"
-original_class_hash = "0x55d9c7d73ce5320b6a5a333abe55319e50c0bf856630ef2e21b378d954ed6cf"
-base_class_hash = "0x679177a2cb757694ac4f326d01052ff0963eac0bc2a17116a2b87badcdf6f76"
-abi = "abis/deployments/contracts/mancala_systems_test_actions_test_actions.json"
-reads = []
-writes = []
-computed = []
-name = "mancala::systems::test_actions::test_actions"
-
 [[models]]
 kind = "DojoModel"
-class_hash = "0x29ed79ab8023a4bc637b430729cc7fae34e88f754de9cc587f44b082fefab73"
-original_class_hash = "0x29ed79ab8023a4bc637b430729cc7fae34e88f754de9cc587f44b082fefab73"
-abi = "abis/deployments/models/mancala_models_game_game.json"
-name = "mancala::models::game::game"
-
-[[models.members]]
-name = "game_id"
-type = "u128"
-key = true
-
-[[models.members]]
-name = "player_one"
-type = "ContractAddress"
-key = false
-
-[[models.members]]
-name = "player_two"
-type = "ContractAddress"
-key = false
-
-[[models.members]]
-name = "current_player"
-type = "ContractAddress"
-key = false
-
-[[models.members]]
-name = "winner"
-type = "ContractAddress"
-key = false
-
-[[models.members]]
-name = "score"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "is_finished"
-type = "bool"
-key = false
-
-[[models.members]]
-name = "p1_pit1"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit2"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit3"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit4"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit5"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit6"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit1"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit2"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit3"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit4"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit5"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit6"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_store"
-type = "u256"
-key = false
-
-[[models.members]]
-name = "p2_store"
-type = "u256"
-key = false
-
-[[models]]
-kind = "DojoModel"
-class_hash = "0x3d94644939193d7628a1af138ab2169fa6d157d504a6d02c2c4f45f725741ec"
-original_class_hash = "0x3d94644939193d7628a1af138ab2169fa6d157d504a6d02c2c4f45f725741ec"
-abi = "abis/deployments/models/mancala_models_game_game_id.json"
-name = "mancala::models::game::game_id"
-
-[[models.members]]
-name = "world_id"
-type = "u32"
-key = true
-
-[[models.members]]
-name = "game_id"
-type = "u128"
-key = false
-
-[[models]]
-kind = "DojoModel"
-class_hash = "0x77bfed0d687ffc53a5c19b5a618bb0fa48000b897a79aa321a1ea0ff581f6f"
-original_class_hash = "0x77bfed0d687ffc53a5c19b5a618bb0fa48000b897a79aa321a1ea0ff581f6f"
+class_hash = "0x3f1405e8506538ce0fc3c2e7308fa5a2352481be2370ef954c10cd06a001419"
+original_class_hash = "0x3f1405e8506538ce0fc3c2e7308fa5a2352481be2370ef954c10cd06a001419"
 abi = "abis/deployments/models/mancala_models_mancala_game_game_id.json"
 name = "mancala::models::mancala_game::game_id"
 
 [[models.members]]
-name = "world_id"
+name = "id"
 type = "u32"
 key = true
 
@@ -185,8 +46,8 @@ key = false
 
 [[models]]
 kind = "DojoModel"
-class_hash = "0x38fafd3c63f7604540a974fa61bf61d112709c2e8efe2197a1532694e74567b"
-original_class_hash = "0x38fafd3c63f7604540a974fa61bf61d112709c2e8efe2197a1532694e74567b"
+class_hash = "0x2af0729b10b86352efca71c1632101b5629a923d27f96049e8e1f1121f304a5"
+original_class_hash = "0x2af0729b10b86352efca71c1632101b5629a923d27f96049e8e1f1121f304a5"
 abi = "abis/deployments/models/mancala_models_mancala_game_mancala_game.json"
 name = "mancala::models::mancala_game::mancala_game"
 
@@ -216,105 +77,13 @@ type = "ContractAddress"
 key = false
 
 [[models.members]]
-name = "score"
-type = "u8"
+name = "status"
+type = "GameStatus"
 key = false
 
 [[models.members]]
-name = "is_finished"
+name = "is_private"
 type = "bool"
-key = false
-
-[[models.members]]
-name = "p1_pit1"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit2"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit3"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit4"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit5"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_pit6"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit1"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit2"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit3"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit4"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit5"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p2_pit6"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "p1_store"
-type = "u256"
-key = false
-
-[[models.members]]
-name = "p2_store"
-type = "u256"
-key = false
-
-[[models]]
-kind = "DojoModel"
-class_hash = "0x79eee88681759e060fa0b7873332c556015a84ad9eb7b83aac1a48b61296bba"
-original_class_hash = "0x79eee88681759e060fa0b7873332c556015a84ad9eb7b83aac1a48b61296bba"
-abi = "abis/deployments/models/mancala_models_moves_moves.json"
-name = "mancala::models::moves::moves"
-
-[[models.members]]
-name = "player"
-type = "ContractAddress"
-key = true
-
-[[models.members]]
-name = "remaining"
-type = "u8"
-key = false
-
-[[models.members]]
-name = "last_direction"
-type = "Direction"
 key = false
 
 [[models]]
@@ -389,21 +158,4 @@ key = false
 [[models.members]]
 name = "games_lost"
 type = "u256"
-key = false
-
-[[models]]
-kind = "DojoModel"
-class_hash = "0x735af1f20779828915fd4d50b4d5e2c3afa0b8567c143a411f0e673171bdec3"
-original_class_hash = "0x735af1f20779828915fd4d50b4d5e2c3afa0b8567c143a411f0e673171bdec3"
-abi = "abis/deployments/models/mancala_models_position_position.json"
-name = "mancala::models::position::position"
-
-[[models.members]]
-name = "player"
-type = "ContractAddress"
-key = true
-
-[[models.members]]
-name = "vec"
-type = "Vec2"
 key = false

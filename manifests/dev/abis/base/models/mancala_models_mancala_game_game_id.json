@@ -177,7 +177,7 @@
     "name": "mancala::models::mancala_game::GameId",
     "members": [
       {
-        "name": "world_id",
+        "name": "id",
         "type": "core::integer::u32"
       },
       {

@@ -60,6 +60,28 @@
   },
   {
     "type": "enum",
+    "name": "mancala::models::mancala_game::GameStatus",
+    "variants": [
+      {
+        "name": "Pending",
+        "type": "()"
+      },
+      {
+        "name": "InProgress",
+        "type": "()"
+      },
+      {
+        "name": "Finished",
+        "type": "()"
+      },
+      {
+        "name": "Forfeited",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "type": "enum",
     "name": "core::bool",
     "variants": [
       {
@@ -69,20 +91,6 @@
       {
         "name": "True",
         "type": "()"
-      }
-    ]
-  },
-  {
-    "type": "struct",
-    "name": "core::integer::u256",
-    "members": [
-      {
-        "name": "low",
-        "type": "core::integer::u128"
-      },
-      {
-        "name": "high",
-        "type": "core::integer::u128"
       }
     ]
   },
@@ -111,68 +119,12 @@
         "type": "core::starknet::contract_address::ContractAddress"
       },
       {
-        "name": "score",
-        "type": "core::integer::u8"
+        "name": "status",
+        "type": "mancala::models::mancala_game::GameStatus"
       },
       {
-        "name": "is_finished",
+        "name": "is_private",
         "type": "core::bool"
-      },
-      {
-        "name": "p1_pit1",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p1_pit2",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p1_pit3",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p1_pit4",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p1_pit5",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p1_pit6",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p2_pit1",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p2_pit2",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p2_pit3",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p2_pit4",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p2_pit5",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p2_pit6",
-        "type": "core::integer::u8"
-      },
-      {
-        "name": "p1_store",
-        "type": "core::integer::u256"
-      },
-      {
-        "name": "p2_store",
-        "type": "core::integer::u256"
       }
     ]
   },
@@ -182,14 +134,44 @@
     "items": [
       {
         "type": "function",
+        "name": "create_initial_game_id",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
         "name": "create_game",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "mancala::models::mancala_game::MancalaGame"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "join_game",
         "inputs": [
           {
-            "name": "player_1",
-            "type": "core::starknet::contract_address::ContractAddress"
+            "name": "game_id",
+            "type": "core::integer::u128"
           },
           {
-            "name": "player_2",
+            "name": "player_two_address",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "create_private_game",
+        "inputs": [
+          {
+            "name": "player_two_address",
             "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
@@ -215,16 +197,41 @@
         ],
         "outputs": [
           {
-            "type": "core::bool"
+            "type": "core::starknet::contract_address::ContractAddress"
           }
         ],
         "state_mutability": "view"
       },
       {
         "type": "function",
-        "name": "foo",
-        "inputs": [],
-        "outputs": [],
+        "name": "get_score",
+        "inputs": [
+          {
+            "name": "game_id",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "(core::integer::u8, core::integer::u8)"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "type": "function",
+        "name": "is_game_finished",
+        "inputs": [
+          {
+            "name": "game_id",
+            "type": "core::integer::u128"
+          }
+        ],
+        "outputs": [
+          {
+            "type": "core::bool"
+          }
+        ],
         "state_mutability": "view"
       }
     ]

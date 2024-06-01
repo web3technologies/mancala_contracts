@@ -79,7 +79,11 @@ mod actions {
         // taking in the game id and the players selected pit, make the move performing all logic
         fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u8) -> ContractAddress{
             let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
+
+            // need to create validation for this status
             assert!(mancala_game.status != GameStatus::Finished, "Game is already finished");
+            assert!(mancala_game.status == GameStatus::InProgress, "Game is not in progress");
+            assert!(mancala_game.player_two != ContractAddressZeroable::zero(), "Player two not yet set.");
 
             let player: ContractAddress = get_caller_address();
             

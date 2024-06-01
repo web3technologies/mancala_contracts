@@ -1,9 +1,0 @@
-kind = "DojoContract"
-class_hash = "0x55d9c7d73ce5320b6a5a333abe55319e50c0bf856630ef2e21b378d954ed6cf"
-original_class_hash = "0x55d9c7d73ce5320b6a5a333abe55319e50c0bf856630ef2e21b378d954ed6cf"
-base_class_hash = "0x0"
-abi = "manifests/dev/abis/base/contracts/mancala_systems_test_actions_test_actions.json"
-reads = []
-writes = []
-computed = []
-name = "mancala::systems::test_actions::test_actions"
