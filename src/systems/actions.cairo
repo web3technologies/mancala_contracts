@@ -22,7 +22,7 @@ mod actions {
     use super::{IActions};
     use starknet::{ContractAddress, get_caller_address};
     use starknet::contract_address::ContractAddressZeroable;
-    use mancala::models::{mancala_game::{MancalaGame, MancalaGameTrait, GameId}};
+    use mancala::models::{mancala_game::{MancalaGame, MancalaGameTrait, GameId, GameStatus}};
     use mancala::models::{player::{GamePlayer, GamePlayerTrait}};
     use core::array::Array;
 
@@ -79,6 +79,8 @@ mod actions {
         // taking in the game id and the players selected pit, make the move performing all logic
         fn move(world: IWorldDispatcher, game_id: u128, selected_pit: u8) -> ContractAddress{
             let mut mancala_game: MancalaGame = get!(world, game_id, (MancalaGame));
+            assert!(mancala_game.status != GameStatus::Finished, "Game is already finished");
+
             let player: ContractAddress = get_caller_address();
             
             mancala_game.validate_move(player, selected_pit);

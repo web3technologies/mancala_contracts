@@ -15,7 +15,15 @@ struct GameId {
     game_id: u128
 }
 
-#[derive(Model, Copy, Drop, Serde, Debug)]
+# [derive(Serde, Copy, Drop, Introspect, PartialEq)]
+enum GameStatus {
+   Pending: (),
+   InProgress: (),
+   Finished: (),
+   Forfeited: (),
+}
+
+#[derive(Model, Copy, Drop, Serde)]
 struct MancalaGame {
     #[key]
     game_id: u128,
@@ -23,9 +31,7 @@ struct MancalaGame {
     player_two: ContractAddress,
     current_player: ContractAddress,
     winner: ContractAddress, // todo implement logic to set this state
-    is_finished: bool,  // todo implement logic to set this state
-    // also maybe better to use and enum to track the status of the game
-    // PENDING, IN_PROGRESS, FINISHED, FORFEITED
+    status: GameStatus,
     is_private: bool
     // block_created: block
 }
@@ -58,7 +64,7 @@ impl MancalaImpl of MancalaGameTrait{
             player_two: ContractAddressZeroable::zero(),
             winner: ContractAddressZeroable::zero(),
             current_player: player_one,
-            is_finished: false,
+            status: GameStatus::Pending,
             is_private: false
         };
         mancala_game
@@ -67,8 +73,8 @@ impl MancalaImpl of MancalaGameTrait{
     // player two can join the game
     fn join_game(ref self: MancalaGame, player_two: GamePlayer){
         self.player_two = player_two.address;
+        self.status = GameStatus::InProgress;
     }
-
 
     // get the current player and the other player
     // the current player is the player who has the current turn
@@ -86,6 +92,7 @@ impl MancalaImpl of MancalaGameTrait{
     // perform validation to ensure that the caller is the current player 
     // also validate that the selected pit is within range
     fn validate_move(self: MancalaGame, player: ContractAddress, selected_pit: u8){
+        assert!(self.status != GameStatus::Finished, "Game is already Finished");
         if player != self.current_player {
             panic!("You are not the current player");
         }
@@ -155,6 +162,9 @@ impl MancalaImpl of MancalaGameTrait{
         };
         self.handle_player_switch(last_pit, opponent);
         self.capture(last_pit, ref current_player, ref opponent);
+        if self.is_game_finished(current_player, opponent){
+            self.status = GameStatus::Finished;
+        }
     }
 
     // todo make this a private function
